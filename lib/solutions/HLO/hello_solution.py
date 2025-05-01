@@ -7,5 +7,3 @@ class HelloSolution:
         if len(friend_name) == 0:
             raise ValueError("friend_name cannot be empty")
         return "Hello, World!"
-
-

@@ -8,4 +8,3 @@ class SumSolution:
         if x > 100 or y > 100:
             raise ValueError("Both arguments must be less than or equal to 100.")
         return x + y
-
