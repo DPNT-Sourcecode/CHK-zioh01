@@ -6,5 +6,6 @@ class HelloSolution:
             raise TypeError("friend_name must be a string")
         if len(friend_name) == 0:
             raise ValueError("friend_name cannot be empty")
-        return f"Hello, {friend_name}!"
+        return "Hello, World!"
+
 
