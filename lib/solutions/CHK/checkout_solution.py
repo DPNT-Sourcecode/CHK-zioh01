@@ -25,12 +25,17 @@ class CheckoutSolution:
         if not isinstance(skus, str):
             return -1
 
+        # handle invalid SKUs
+        if any(item not in self.prices for item in skus):
+            return -1
+
         # get counts for SKUs
         counts = Counter(skus)
         total = 0
 
         # determine the total checkout value (with offers applied)
         for item, count in counts.items():
+            # handle items with applicable offers
             if item in self.offers:
                 offer = self.offers[item]
                 total += (count // offer.quantity) * offer.price
@@ -39,3 +44,4 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
