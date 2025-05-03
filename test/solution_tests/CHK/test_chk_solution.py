@@ -24,5 +24,3 @@ def test_checkout_solution():
 
     # Multiple offers
     assert checkout.checkout("AAABB") == 175
-
-
