@@ -18,6 +18,11 @@ def test_checkout_solution():
     assert checkout.checkout("ABCD") == 115
     assert checkout.checkout("CC") == 40
 
-    # With offers
+    # With indivudual offers
+    assert checkout.checkout("AAA") == 130
+    assert checkout.checkout("BB") == 45
+
+    # Multiple offers
     assert checkout.checkout("AAABB") == 175
+
 
