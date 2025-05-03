@@ -15,8 +15,8 @@ class CheckoutSolution:
         self.prices = {"A": 50, "B": 30, "C": 20, "D": 15}
         # Set the special offers for SKUs
         self.offers = {
-            "A": (3, 130),
-            "B": (2, 45),
+            "A": Offer(quantity=3, price=130),
+            "B": Offer(quantity=2, price=45),
         }
 
     # skus = unicode string
@@ -39,6 +39,7 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
 
 
