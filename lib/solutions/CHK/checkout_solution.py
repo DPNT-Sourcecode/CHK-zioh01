@@ -1,3 +1,14 @@
+from collections import Counter
+from typing import NamedTuple
+
+
+class Offer(NamedTuple):
+    "Model for offers."
+
+    quantity: int
+    price: int
+
+
 class CheckoutSolution:
     def __init__(self):
         # Set the prices table for SKUs
@@ -9,7 +20,18 @@ class CheckoutSolution:
         }
 
     # skus = unicode string
-    def checkout(self, skus):
+    def checkout(self, skus: str) -> int:
+        # handle incorrect type for SKUs input
+        if not isinstance(skus, str):
+            return -1
+
+        # get counts for SKUs
+        counts = Counter(skus)
+        total = 0
+
+        # determine the total checkout value (with offers applied)
+
         raise NotImplementedError()
+
 
 
