@@ -1,7 +1,8 @@
 {
   "name": "accelerate_runner",
   "scripts": {
-    "start_session": "python lib/send_command_to_server.py",
+    "record": "./record_and_upload.sh --no-video",
+    "start": "python lib/send_command_to_server.py",
     "test": "python -m pytest -q test/solution_tests/"
   }
 }
