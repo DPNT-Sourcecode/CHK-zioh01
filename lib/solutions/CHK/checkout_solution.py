@@ -12,12 +12,14 @@ class Offer(NamedTuple):
 class CheckoutSolution:
     def __init__(self):
         # Set the prices table for SKUs
-        self.prices = {"A": 50, "B": 30, "C": 20, "D": 15}
+        self.prices = {"A": 50, "B": 30, "C": 20, "D": 15, "E": 40}
         # Set the special offers for SKUs
         self.offers = {
-            "A": Offer(quantity=3, price=130),
-            "B": Offer(quantity=2, price=45),
+            "A": [Offer(quantity=3, price=130), Offer(quantity=5, price=200)],
+            "B": [Offer(quantity=2, price=45)],
         }
+        # Set the offers with free items
+        self.free_item_offers = {}
 
     # skus = unicode string
     def checkout(self, skus: str) -> int:
@@ -44,4 +46,5 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
