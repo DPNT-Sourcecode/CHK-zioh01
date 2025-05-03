@@ -30,8 +30,16 @@ class CheckoutSolution:
         total = 0
 
         # determine the total checkout value (with offers applied)
+        for item, count in counts.items():
+            if item in self.offers:
+                offer = self.offers[item]
+                total += (count // offer.quantity) * offer.price
+                total += (count % offer.quantity) * self.prices[item]
+            else:
+                total += count * self.prices[item]
 
-        raise NotImplementedError()
+        return total
+
 
 
 
