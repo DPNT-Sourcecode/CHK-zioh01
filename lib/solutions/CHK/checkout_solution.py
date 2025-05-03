@@ -9,6 +9,11 @@ class Offer(NamedTuple):
     price: int
 
 
+class BuyXGetYFree(NamedTuple):
+    buy_quantity: int
+    free_item: str
+
+
 class CheckoutSolution:
     def __init__(self):
         # Set the prices table for SKUs
@@ -19,7 +24,7 @@ class CheckoutSolution:
             "B": [Offer(quantity=2, price=45)],
         }
         # Set the offers with free items
-        self.free_item_offers = {}
+        self.free_item_offers = {"E": BuyXGetYFree(buy_quantity=2, free_item="B")}
 
     # skus = unicode string
     def checkout(self, skus: str) -> int:
@@ -46,5 +51,6 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
 
