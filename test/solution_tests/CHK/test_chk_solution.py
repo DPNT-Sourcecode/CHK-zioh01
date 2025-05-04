@@ -13,30 +13,63 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("ABCa", -1),
         # Empty basket
         ("", 0),
-        # Single SKUs
+        # Single SKUs (basic pricing)
         ("A", 50),
         ("B", 30),
         ("C", 20),
         ("D", 15),
         ("E", 40),
         ("F", 10),
-        # Multiples of same SKU
-        ("AA", 100),
-        ("BB", 45),
-        ("CC", 40),
-        ("DD", 30),
-        ("EE", 80),
-        ("FF", 20),
-        # Special offers for A
-        ("AAA", 130),
-        ("AAAA", 180),
-        ("AAAAA", 200),
+        ("G", 20),
+        ("H", 10),
+        ("I", 35),
+        ("J", 60),
+        ("K", 80),
+        ("L", 90),
+        ("M", 15),
+        ("N", 40),
+        ("O", 10),
+        ("P", 50),
+        ("Q", 30),
+        ("R", 50),
+        ("S", 30),
+        ("T", 20),
+        ("U", 40),
+        ("V", 50),
+        ("W", 20),
+        ("X", 90),
+        ("Y", 10),
+        ("Z", 50),
+        # Multi-price offers for A
+        ("AAA", 130),  # 3A for 130
+        ("AAAA", 180),  # 3A for 130 + 1A for 50
+        ("AAAAA", 200),  # 5A for 200
         ("AAAAAA", 250),  # 5A for 200 + 1A for 50
         ("AAAAAAA", 300),  # 5A for 200 + 2A for 100
         ("AAAAAAAA", 330),  # 5A for 200 + 3A for 130
-        # Special offers for B
-        ("BB", 45),
+        # Multi-price offers for B
+        ("BB", 45),  # 2B for 45
         ("BBB", 75),  # 2B for 45 + 1B for 30
+        # Multi-price offers for H
+        ("HHHHH", 45),  # 5H for 45
+        ("HHHHHHHHHH", 80),  # 10H for 80
+        ("HHHHHHHHHHH", 90),  # 10H for 80 + 1H for 10
+        ("HHHHHHHHHHHHHHHH", 160),  # 10H for 80 + 5H for 45 + 1H for 10
+        # Multi-price offers for K
+        ("KK", 150),  # 2K for 150
+        ("KKK", 230),  # 2K for 150 + 1K for 80
+        # Multi-price offers for P
+        ("PPPPP", 200),  # 5P for 200
+        ("PPPPPP", 250),  # 5P for 200 + 1P for 50
+        # Multi-price offers for Q
+        ("QQQ", 80),  # 3Q for 80
+        ("QQQQ", 110),  # 3Q for 80 + 1Q for 30
+        # Multi-price offers for V
+        ("VV", 90),  # 2V for 90
+        ("VVV", 130),  # 3V for 130
+        ("VVVV", 180),  # 3V for 130 + 1V for 50
+        ("VVVVV", 230),  # 3V for 130 + 2V for 90
+        ("VVVVVV", 260),  # 2 sets of 3V for 260
         # Free B with E offer
         ("EEB", 80),  # 2E for 80 + 1B free (not charged)
         ("EEBB", 110),  # 2E for 80 + 1B free + 1B charged (30)
@@ -50,18 +83,30 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("FFFF", 30),  # 4F = 2F for 20 + 2F for 10 (one free)
         ("FFFFF", 40),  # 5F = 2F for 20 + 2F for 20, the 5th costs 0
         ("FFFFFF", 40),  # 6F = 2 sets of 3F, where each set is 2F paid + 1F free
-        # Complex combinations
+        # Buy 3N get one M free
+        ("NNNM", 120),  # 3N(120) + M free
+        ("NNNNM", 160),  # 3N(120) + 1N(40) + M free
+        ("NNNMM", 135),  # 3N(120) + 1M(15) + 1M free
+        # Buy 3R get one Q free
+        ("RRRQ", 150),  # 3R(150) + Q free
+        ("RRRQQQ", 210),  # 3R(150) + 2Q(60) + 1Q free
+        # Buy 3U get one U free
+        ("UUU", 120),  # 3U(120), no free item yet
+        ("UUUU", 120),  # 3U(120) + 1U free
+        ("UUUUUUU", 240),  # 6U(240) + 1U free
+        ("UUUUUUUU", 240),  # 6U(240) + 2U free
+        # Complex combinations across multiple offer types
         ("ABCDE", 155),  # A(50) + B(30) + C(20) + D(15) + E(40)
-        ("ABCDEF", 165),  # A(50) + B(30) + C(20) + D(15) + E(40) + F(10)
+        ("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 965),  # One of each item
         ("AAAAAEEBAAABB", 455),  # 10A for 400 + 2E for 80 + 3B where 1 is free = 455
         (
             "ABCDECBAABCABBAEEE",
             510,
-        ),  # 5A(200) + 5B(105 after discount) + 3C(60) + 2D(30) + 3E(120) - 15 = 510
+        ),  # 5A(200) + 5B(105) + 3C(60) + 2D(30) + 3E(120) - 15 = 510
         (
-            "ABCDECBAABCABBAEEEFFFFFFFF",
-            570,
-        ),  # Previous case (510) + 6F where 2 are free (60) = 570
+            "RRRNNNFFUUU",
+            360,
+        ),  # 3R(150) + 3N(120) + 3F(20) + 3U(120) - 1Q(30) - 1M(15) - 1F(0) - 1U(0) = 360
     ],
 )
 def test_checkout_with_params(skus, expected):
@@ -70,11 +115,12 @@ def test_checkout_with_params(skus, expected):
 
     This test covers:
     - Invalid input handling
-    - Basic item pricing
-    - Multi-item price offers (e.g., 3A for 130)
+    - Basic item pricing for all 26 SKUs (A through Z)
+    - Multi-item price offers (e.g., 3A for 130, 10H for 80)
     - 'Buy X get Y free' offers (e.g., buy 2E get 1B free)
-    - 'Buy X get X free' offers (e.g., buy 2F get 1F free)
-    - Combined offers
+    - 'Buy X get X free' offers (e.g., buy 3U get 1U free)
+    - Combined and complex offers
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+

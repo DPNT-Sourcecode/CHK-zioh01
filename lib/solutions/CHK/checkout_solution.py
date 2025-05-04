@@ -51,7 +51,34 @@ class CheckoutSolution:
 
     def __init__(self):
         # Base prices for each item
-        self.prices = {"A": 50, "B": 30, "C": 20, "D": 15, "E": 40, "F": 10}
+        self.prices = {
+            "A": 50,
+            "B": 30,
+            "C": 20,
+            "D": 15,
+            "E": 40,
+            "F": 10,
+            "G": 20,
+            "H": 10,
+            "I": 35,
+            "J": 60,
+            "K": 80,
+            "L": 90,
+            "M": 15,
+            "N": 40,
+            "O": 10,
+            "P": 50,
+            "Q": 30,
+            "R": 50,
+            "S": 30,
+            "T": 20,
+            "U": 40,
+            "V": 50,
+            "W": 20,
+            "X": 90,
+            "Y": 10,
+            "Z": 50,
+        }
 
         # Multi-price offers for bulk purchases
         # Ordered by size for better customer value (larger offers first)
@@ -61,12 +88,26 @@ class CheckoutSolution:
                 Offer(quantity=3, price=130),  # 3A for 130
             ],
             "B": [Offer(quantity=2, price=45)],  # 2B for 45
+            "H": [
+                Offer(quantity=10, price=80),  # 10H for 80
+                Offer(quantity=5, price=45),  # 5H for 45
+            ],
+            "K": [Offer(quantity=2, price=150)],  # 2K for 150
+            "P": [Offer(quantity=5, price=200)],  # 5P for 200
+            "Q": [Offer(quantity=3, price=80)],  # 3Q for 80
+            "V": [
+                Offer(quantity=3, price=130),  # 3V for 130
+                Offer(quantity=2, price=90),  # 2V for 90
+            ],
         }
 
         # Buy X get Y free offers
         self.free_item_offers = {
             "E": BuyXGetYFree(buy_quantity=2, free_item="B"),  # Buy 2E get 1B free
             "F": BuyXGetYFree(buy_quantity=2, free_item="F"),  # Buy 2F get 1F free
+            "N": BuyXGetYFree(buy_quantity=3, free_item="M"),  # Buy 3N get 1M free
+            "R": BuyXGetYFree(buy_quantity=3, free_item="Q"),  # Buy 3R get 1Q free
+            "U": BuyXGetYFree(buy_quantity=3, free_item="U"),  # Buy 3U get 1U free
         }
 
     def _apply_free_item_offers(self, counts: Counter) -> Counter:
@@ -86,28 +127,46 @@ class CheckoutSolution:
         # Create a copy of the counts to avoid modifying the original
         adjusted_counts = counts.copy()
 
+        # First, collect all the free items possible
+        free_item_counts = Counter()
         for item, offer in self.free_item_offers.items():
             if item in counts:
-                # Calculate how many complete sets of the offer item we have
-                # and therefore how many free items can be claimed
+                # Calculate how many free items can be claimed
                 free_items = counts[item] // offer.buy_quantity
+                if free_items > 0:
+                    free_item_counts[offer.free_item] += free_items
 
-                # Handle the case where item gives itself for free (e.g., F)
-                if offer.free_item == item:
-                    # For every N items of X that you buy, you get 1 more free
-                    # So if you have a total of M items, you only need to pay for M - (M // (N+1))
-                    # For example, for every 2F you get 1F free, meaning for every 3F you only pay for 2F
-                    effective_count = counts[item] - min(
-                        free_items, counts[item] // (offer.buy_quantity + 1)
-                    )
-                    adjusted_counts[item] = effective_count
-                # Handle the case where item gives another item for free (e.g., E gives B)
-                elif free_items > 0 and offer.free_item in counts:
-                    # Reduce the count of the free item, but not below 0
-                    # This ensures we don't give more free items than exist in the basket
-                    adjusted_counts[offer.free_item] = max(
-                        0, counts[offer.free_item] - free_items
-                    )
+        # Then, apply the adjustments for each free item
+        for item, count in free_item_counts.items():
+            if item in counts:
+                # Don't give more free items than actually exist in the basket
+                free_count = min(count, counts[item])
+
+                # Special case for items that give themselves for free
+                if any(
+                    offer.free_item == item
+                    and offer.buy_quantity * free_count <= counts[item]
+                    for offer_item, offer in self.free_item_offers.items()
+                    if offer_item == item
+                ):
+                    # For buy X get X free offers, we need a different calculation
+                    # to avoid double counting
+                    item_offers = [
+                        (offer_item, offer)
+                        for offer_item, offer in self.free_item_offers.items()
+                        if offer_item == item and offer.free_item == item
+                    ]
+                    if item_offers:
+                        offer_item, offer = item_offers[0]
+                        # Calculate how many items are effectively free
+                        # e.g., for 2F get 1F free, with 6F, 2 are free (every third item)
+                        buy_quantity = offer.buy_quantity
+                        total_count = counts[item]
+                        free_count = total_count // (buy_quantity + 1)
+                        adjusted_counts[item] = total_count - free_count
+                else:
+                    # For other items, simply reduce the count
+                    adjusted_counts[item] = counts[item] - free_count
 
         return adjusted_counts
 
@@ -154,6 +213,10 @@ class CheckoutSolution:
             # For items that might be free, use the adjusted count after applying free item offers
             count = adjusted_counts[item]
 
+            # Skip if count is 0 after adjustments
+            if count == 0:
+                continue
+
             # Apply multi-price offers if available for this item
             if item in self.multi_price_offers:
                 remaining = count
@@ -172,3 +235,4 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
