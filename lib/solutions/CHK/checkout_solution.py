@@ -1,6 +1,6 @@
 from collections import Counter
 from typing import Counter as CounterType
-from typing import Dict, FrozenSet, List, NamedTuple, Tuple
+from typing import NamedTuple
 
 
 class Offer(NamedTuple):
@@ -20,7 +20,7 @@ class BuyXGetYFree(NamedTuple):
 class GroupDiscount(NamedTuple):
     """Represents a group discount offer (e.g., any 3 of S,T,X,Y,Z for 45)."""
 
-    items: FrozenSet[str]  # Set of items eligible for the group discount
+    items: frozenset[str]  # Set of items eligible for the group discount
     quantity: int  # Number of items needed for the discount
     price: int  # Special price when buying this quantity
 
@@ -45,6 +45,10 @@ class CheckoutSolution:
     1. First apply "buy X get Y free" offers to avoid charging for items that should be free
     2. Then apply group discount offers to maximize savings on higher-priced items
     3. Finally apply multi-item price offers (larger quantity offers before smaller ones)
+
+    Methods:
+        checkout(skus: str) -> int:
+            Calculate the total price for a basket of items
 
     Examples:
         >>> solution = CheckoutSolution()
@@ -71,7 +75,7 @@ class CheckoutSolution:
     def __init__(self) -> None:
         """Initialize the checkout solution with item prices and special offers."""
         # Base prices for each item
-        self.prices: Dict[str, int] = {
+        self.prices: dict[str, int] = {
             "A": 50,
             "B": 30,
             "C": 20,
@@ -102,7 +106,7 @@ class CheckoutSolution:
 
         # Multi-price offers for bulk purchases
         # Ordered by size for better customer value (larger offers first)
-        self.multi_price_offers: Dict[str, List[Offer]] = {
+        self.multi_price_offers: dict[str, list[Offer]] = {
             "A": [
                 Offer(quantity=5, price=200),  # 5A for 200 (better value)
                 Offer(quantity=3, price=130),  # 3A for 130
@@ -122,7 +126,7 @@ class CheckoutSolution:
         }
 
         # Buy X get Y free offers
-        self.free_item_offers: Dict[str, BuyXGetYFree] = {
+        self.free_item_offers: dict[str, BuyXGetYFree] = {
             "E": BuyXGetYFree(buy_quantity=2, free_item="B"),  # Buy 2E get 1B free
             "F": BuyXGetYFree(buy_quantity=2, free_item="F"),  # Buy 2F get 1F free
             "N": BuyXGetYFree(buy_quantity=3, free_item="M"),  # Buy 3N get 1M free
@@ -131,7 +135,7 @@ class CheckoutSolution:
         }
 
         # Group discount offers
-        self.group_discounts: List[GroupDiscount] = [
+        self.group_discounts: list[GroupDiscount] = [
             GroupDiscount(
                 items=frozenset(["S", "T", "X", "Y", "Z"]),
                 quantity=3,
@@ -215,7 +219,7 @@ class CheckoutSolution:
             if offer_item == item
         )
 
-    def _apply_group_discounts(self, counts: CounterType) -> Tuple[CounterType, int]:
+    def _apply_group_discounts(self, counts: CounterType) -> tuple[CounterType, int]:
         """Apply group discount offers and return adjusted counts and additional cost.
 
         For offers like "Buy any 3 of S,T,X,Y,Z for 45", this method:
@@ -353,6 +357,7 @@ class CheckoutSolution:
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
+
 
 
 
