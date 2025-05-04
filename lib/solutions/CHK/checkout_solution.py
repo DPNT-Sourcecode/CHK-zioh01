@@ -360,10 +360,3 @@ class CheckoutSolution:
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
-
-
-
-
-
-
-

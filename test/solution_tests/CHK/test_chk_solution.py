@@ -24,7 +24,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("H", 10),
         ("I", 35),
         ("J", 60),
-        ("K", 70),  # Updated from 80 to 70
+        ("K", 70),
         ("L", 90),
         ("M", 15),
         ("N", 40),
@@ -32,14 +32,14 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("P", 50),
         ("Q", 30),
         ("R", 50),
-        ("S", 20),  # Updated from 30 to 20
+        ("S", 20),
         ("T", 20),
         ("U", 40),
         ("V", 50),
         ("W", 20),
-        ("X", 17),  # Updated from 90 to 17
-        ("Y", 20),  # Updated from 10 to 20
-        ("Z", 21),  # Updated from 50 to 21
+        ("X", 17),
+        ("Y", 20),
+        ("Z", 21),
         # Multi-price offers for A
         ("AAA", 130),  # 3A for 130
         ("AAAA", 180),  # 3A for 130 + 1A for 50
@@ -55,8 +55,8 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("HHHHHHHHHH", 80),  # 10H for 80
         ("HHHHHHHHHHH", 90),  # 10H for 80 + 1H for 10
         ("HHHHHHHHHHHHHHHH", 135),  # 10H for 80 + 5H for 45 + 1H for 10
-        # Multi-price offers for K (updated)
-        ("KK", 120),  # 2K for 120 (updated from 150)
+        # Multi-price offers for K
+        ("KK", 120),  # 2K for 120
         ("KKK", 190),  # 2K for 120 + 1K for 70
         # Multi-price offers for P
         ("PPPPP", 200),  # 5P for 200
@@ -98,7 +98,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("UUUU", 120),  # 3U(120) + 1U free
         ("UUUUUUU", 240),  # 6U(240) + 1U free
         ("UUUUUUUU", 240),  # 6U(240) + 2U free
-        # New group discount offer: any 3 of S,T,X,Y,Z for 45
+        # Group discount offer: any 3 of S,T,X,Y,Z for 45
         ("STX", 45),  # Group offer: any 3 of S,T,X,Y,Z
         ("STY", 45),  # Group offer: any 3 of S,T,X,Y,Z
         ("STZ", 45),  # Group offer: any 3 of S,T,X,Y,Z
@@ -144,7 +144,7 @@ def test_checkout_with_params(skus, expected):
     This test thoroughly covers:
     - Invalid input handling (None, lowercase letters, invalid characters)
     - Empty basket handling
-    - Basic item pricing for all 26 SKUs (A through Z) with updated prices for K, S, X, Y, Z
+    - Basic item pricing for all 26 SKUs (A through Z)
     - Various multi-item price offers:
       * Different quantities (2B for 45, 3A for 130, 5A for 200, 10H for 80)
       * Multiple offers for same item (A, H, V)
@@ -164,6 +164,3 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
-
-
-
