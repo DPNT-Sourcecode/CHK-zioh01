@@ -137,7 +137,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         # X(17) and Y(20) charged at normal price
     ],
 )
-def test_checkout_with_params(skus, expected):
+def test_checkout(skus, expected):
     """
     Test the checkout functionality with various combinations of items and offers.
 
@@ -164,3 +164,4 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
