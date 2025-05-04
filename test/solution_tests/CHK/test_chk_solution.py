@@ -103,25 +103,31 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
             "ABCDECBAABCABBAEEE",
             510,
         ),  # 5A(200) + 5B(105) + 3C(60) + 2D(30) + 3E(120) - 15 = 510
-        (
-            "RRRNNNFFUUU",
-            410,
-        ),  # 3R(150) + 3N(120) + 2F(20) + 3U(120) = 410 (corrected)
+        ("RRRNNNFFUUU", 410),  # 3R(150) + 3N(120) + 2F(20) + 3U(120) = 410
     ],
 )
 def test_checkout_with_params(skus, expected):
     """
     Test the checkout functionality with various combinations of items and offers.
 
-    This test covers:
-    - Invalid input handling
+    This test thoroughly covers:
+    - Invalid input handling (None, lowercase letters, invalid characters)
+    - Empty basket handling
     - Basic item pricing for all 26 SKUs (A through Z)
-    - Multi-item price offers (e.g., 3A for 130, 10H for 80)
-    - 'Buy X get Y free' offers (e.g., buy 2E get 1B free)
-    - 'Buy X get X free' offers (e.g., buy 3U get 1U free)
-    - Combined and complex offers
+    - Various multi-item price offers:
+      * Different quantities (2B for 45, 3A for 130, 5A for 200, 10H for 80)
+      * Multiple offers for same item (A, H, V)
+      * Best value application ordering
+    - 'Buy X get Y free' offers:
+      * Different items (buy 2E get 1B free, buy 3N get 1M free, buy 3R get 1Q free)
+      * Interaction with multi-price offers (E and B combination)
+    - 'Buy X get X free' offers:
+      * Self-referential offers (buy 2F get 1F free, buy 3U get 1U free)
+      * Different quantities and patterns
+    - Complex combinations across all offer types
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
 

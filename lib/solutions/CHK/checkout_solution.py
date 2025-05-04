@@ -20,14 +20,16 @@ class CheckoutSolution:
     """Checkout system that calculates total price with various types of offers.
 
     This class implements a flexible pricing engine for a supermarket checkout system that
-    handles multiple types of price offers:
+    handles multiple types of price offers for a variety of products (SKUs A through Z):
 
-    1. Multi-item price offers (e.g., 3A for 130, 5A for 200)
-    2. 'Buy X get Y free' offers (e.g., buy 2E get 1B free)
-    3. 'Buy X get one X free' offers (e.g., buy 2F get one F free)
+    1. Multi-item price offers (e.g., 3A for 130, 5A for 200, 10H for 80)
+    2. 'Buy X get Y free' offers (e.g., buy 2E get 1B free, buy 3R get 1Q free)
+    3. 'Buy X get X free' offers (e.g., buy 2F get 1F free, buy 3U get 1U free)
 
     The system always favors the customer when applying offers, applying offers with
     better value first and ensuring the customer gets the maximum possible discount.
+    When multiple offers are available for the same item, larger offers are applied first
+    as they provide better value.
 
     Methods:
         checkout(skus: str) -> int:
@@ -47,6 +49,9 @@ class CheckoutSolution:
         >>> solution.checkout("FFF")
         # 3F where one is free from the offer, total = 20
         20
+        >>> solution.checkout("UUUU")
+        # 3U = 120, 1U free, total = 120
+        120
     """
 
     def __init__(self):
@@ -235,4 +240,5 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
