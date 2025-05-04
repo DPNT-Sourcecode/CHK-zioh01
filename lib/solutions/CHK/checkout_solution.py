@@ -234,7 +234,7 @@ class CheckoutSolution:
             counts: Counter of items in the basket
 
         Returns:
-            A tuple containing:
+            tuple containing:
                 - adjusted_counts: Counter with items after applying group discounts
                 - group_discount_cost: Total cost from group discounts
         """
@@ -316,7 +316,7 @@ class CheckoutSolution:
         then multi-item pricing offers (larger quantity offers before smaller ones).
 
         Args:
-            skus: A string containing the SKUs of all products in the basket
+            skus: A string containing the SKUs of all products in the basket.
                  Each character represents one item (e.g., "AABCD" = 2 A's, 1 B, 1 C, 1 D)
 
         Returns:
@@ -357,6 +357,7 @@ class CheckoutSolution:
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
+
 
 
 
