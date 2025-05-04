@@ -16,6 +16,14 @@ class BuyXGetYFree(NamedTuple):
     free_item: str  # Item that is given for free
 
 
+class GroupDiscount(NamedTuple):
+    """Represents a group discount offer (e.g., any 3 of S,T,X,Y,Z for 45)."""
+
+    items: frozenset  # Set of items eligible for the group discount
+    quantity: int  # Number of items needed for the discount
+    price: int  # Special price when buying this quantity
+
+
 class CheckoutSolution:
     """Checkout system that calculates total price with various types of offers.
 
@@ -25,6 +33,7 @@ class CheckoutSolution:
     1. Multi-item price offers (e.g., 3A for 130, 5A for 200, 10H for 80)
     2. 'Buy X get Y free' offers (e.g., buy 2E get 1B free, buy 3R get 1Q free)
     3. 'Buy X get X free' offers (e.g., buy 2F get 1F free, buy 3U get 1U free)
+    4. Group discount offers (e.g., buy any 3 of S,T,X,Y,Z for 45)
 
     The system always favors the customer when applying offers, applying offers with
     better value first and ensuring the customer gets the maximum possible discount.
@@ -52,6 +61,9 @@ class CheckoutSolution:
         >>> solution.checkout("UUUU")
         # 3U = 120, 1U free, total = 120
         120
+        >>> solution.checkout("STX")
+        # Group discount: 3 of S,T,X for 45, total = 45
+        45
     """
 
     def __init__(self):
@@ -67,7 +79,7 @@ class CheckoutSolution:
             "H": 10,
             "I": 35,
             "J": 60,
-            "K": 80,
+            "K": 70,  # Updated from 80 to 70
             "L": 90,
             "M": 15,
             "N": 40,
@@ -75,14 +87,14 @@ class CheckoutSolution:
             "P": 50,
             "Q": 30,
             "R": 50,
-            "S": 30,
+            "S": 20,  # Updated from 30 to 20
             "T": 20,
             "U": 40,
             "V": 50,
             "W": 20,
-            "X": 90,
-            "Y": 10,
-            "Z": 50,
+            "X": 17,  # Updated from 90 to 17
+            "Y": 20,  # Updated from 10 to 20
+            "Z": 21,  # Updated from 50 to 21
         }
 
         # Multi-price offers for bulk purchases
@@ -97,7 +109,7 @@ class CheckoutSolution:
                 Offer(quantity=10, price=80),  # 10H for 80
                 Offer(quantity=5, price=45),  # 5H for 45
             ],
-            "K": [Offer(quantity=2, price=150)],  # 2K for 150
+            "K": [Offer(quantity=2, price=120)],  # 2K for 120 (updated from 150)
             "P": [Offer(quantity=5, price=200)],  # 5P for 200
             "Q": [Offer(quantity=3, price=80)],  # 3Q for 80
             "V": [
@@ -114,6 +126,15 @@ class CheckoutSolution:
             "R": BuyXGetYFree(buy_quantity=3, free_item="Q"),  # Buy 3R get 1Q free
             "U": BuyXGetYFree(buy_quantity=3, free_item="U"),  # Buy 3U get 1U free
         }
+
+        # Group discount offers
+        self.group_discounts = [
+            GroupDiscount(
+                items=frozenset(["S", "T", "X", "Y", "Z"]),
+                quantity=3,
+                price=45,
+            ),  # Any 3 of S,T,X,Y,Z for 45
+        ]
 
     def _apply_free_item_offers(self, counts: Counter) -> Counter:
         """Apply 'buy X get Y free' offers and return adjusted counts.
@@ -177,18 +198,92 @@ class CheckoutSolution:
 
         return adjusted_counts
 
+    def _apply_group_discounts(self, counts: Counter) -> (Counter, int):
+        """Apply group discount offers and return adjusted counts and additional cost.
+
+        For offers like "Buy any 3 of S,T,X,Y,Z for 45", this method:
+        1. Identifies eligible items in the basket
+        2. Applies the offer as many times as possible
+        3. Returns adjusted counts and the additional cost from group discounts
+
+        The method prioritises higher priced items for the discount to maximise
+        customer value, as per supermarket policy.
+
+        Args:
+            counts: Counter of items in the basket
+
+        Returns:
+            tuple: (adjusted_counts, group_discount_cost)
+                - adjusted_counts: Counter with items after applying group discounts
+                - group_discount_cost: Total cost from group discounts
+        """
+        # Create a copy to avoid modifying the original
+        adjusted_counts = counts.copy()
+        total_group_cost = 0
+
+        # Process each group discount offer
+        for discount in self.group_discounts:
+            # Get all eligible items and their counts
+            eligible_items = []
+            for item in discount.items:
+                if item in adjusted_counts and adjusted_counts[item] > 0:
+                    eligible_items.append(
+                        (item, self.prices[item], adjusted_counts[item])
+                    )
+
+            # Sort by price descending to maximise customer value
+            # Higher priced items are included in the offer first
+            eligible_items.sort(key=lambda x: x[1], reverse=True)
+
+            # Apply the discount as many times as possible
+            while True:
+                items_for_offer = []
+                total_count = 0
+
+                # Try to collect enough items for one offer
+                for item, _, count in eligible_items:
+                    # Skip if this item is depleted
+                    if adjusted_counts[item] <= 0:
+                        continue
+
+                    # Take as many as needed/available
+                    items_needed = min(
+                        adjusted_counts[item], discount.quantity - total_count
+                    )
+                    if items_needed > 0:
+                        items_for_offer.append((item, items_needed))
+                        total_count += items_needed
+
+                    # If we have enough items, stop looking
+                    if total_count >= discount.quantity:
+                        break
+
+                # If we couldn't collect enough items, we're done
+                if total_count < discount.quantity:
+                    break
+
+                # Apply the discount
+                for item, count in items_for_offer:
+                    adjusted_counts[item] -= count
+
+                # Add the cost of this group discount
+                total_group_cost += discount.price
+
+        return adjusted_counts, total_group_cost
+
     def checkout(self, skus: str) -> int:
         """Calculate total price of items, including all applicable special offers.
 
         The method processes the basket by:
         1. Validating the input
         2. Applying "buy X get Y free" offers
-        3. Applying multi-item price offers
+        3. Applying group discount offers
+        4. Applying multi-item price offers
 
         The checkout process prioritises customer value by applying offers in the
         optimal order: free item offers first (to avoid paying for items that should
-        be free), then multi-item pricing offers (larger quantity offers before
-        smaller ones).
+        be free), then group discounts (to maximize savings on higher-priced items),
+        then multi-item pricing offers (larger quantity offers before smaller ones).
 
         Args:
             skus: A string containing the SKUs of all products in the basket
@@ -216,13 +311,20 @@ class CheckoutSolution:
         # Step 1: Apply any "buy X get Y free" offers
         adjusted_counts = self._apply_free_item_offers(counts)
 
-        # Step 2: Calculate price for each item type
+        # Step 2: Apply group discount offers
+        adjusted_counts, group_discount_cost = self._apply_group_discounts(
+            adjusted_counts
+        )
+        total += group_discount_cost
+
+        # Step 3: Calculate price for each item type
         for item in self.prices:
             # Skip items not in the basket
             if item not in counts:
                 continue
 
-            # For items that might be free, use the adjusted count after applying free item offers
+            # For items that might be free or part of group discounts,
+            # use the adjusted count after applying those offers
             count = adjusted_counts[item]
 
             # Skip if count is 0 after adjustments
@@ -247,3 +349,4 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
