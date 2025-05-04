@@ -308,12 +308,16 @@ class CheckoutSolution:
         1. Validating the input
         2. Applying "buy X get Y free" offers
         3. Applying group discount offers
-        4. Applying multi-item price offers
+        4. Applying multi-item price offers to remaining items (Conditional: only for items still
+           in the basket after previous offers have been applied)
 
         The checkout process prioritises customer value by applying offers in the
         optimal order: free item offers first (to avoid paying for items that should
         be free), then group discounts (to maximize savings on higher-priced items),
         then multi-item pricing offers (larger quantity offers before smaller ones).
+
+        Items that have been fully consumed by free item offers or group discounts
+        are not processed in subsequent steps.
 
         Args:
             skus: A string containing the SKUs of all products in the basket.
@@ -353,10 +357,11 @@ class CheckoutSolution:
             if item not in adjusted_counts or adjusted_counts[item] <= 0:
                 continue
 
-            # Apply pricing for remaining items
+            # Step 4: Apply pricing for remaining items
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
+
 
 
 
