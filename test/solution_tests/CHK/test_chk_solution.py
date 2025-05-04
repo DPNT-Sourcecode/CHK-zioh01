@@ -54,7 +54,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("HHHHH", 45),  # 5H for 45
         ("HHHHHHHHHH", 80),  # 10H for 80
         ("HHHHHHHHHHH", 90),  # 10H for 80 + 1H for 10
-        ("HHHHHHHHHHHHHHHH", 150),  # 10H for 80 + 5H for 45 + 1H for 10
+        ("HHHHHHHHHHHHHHHH", 135),  # 10H for 80 + 5H for 45 + 1H for 10
         # Multi-price offers for K (updated)
         ("KK", 120),  # 2K for 120 (updated from 150)
         ("KKK", 190),  # 2K for 120 + 1K for 70
@@ -77,10 +77,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("EEEB", 120),  # 3E(120) and B is free
         ("EE", 80),  # 2E for 80, qualify for free B but no B in basket
         # Interaction between E and B offers
-        (
-            "EEBBB",
-            140,
-        ),  # 2E(80) + 3B where 1 is free, so 2B with offer = 45 + 1B = 75, total 155
+        ("EEBBB", 125),  # 2E(80) + 3B where 1 is free = 2B (45)
         # 2F get one F free offer
         ("FF", 20),  # 2F for 20
         ("FFF", 20),  # 3F, but one is free, so paying for 2F = 20
@@ -106,29 +103,29 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("STY", 45),  # Group offer: any 3 of S,T,X,Y,Z
         ("STZ", 45),  # Group offer: any 3 of S,T,X,Y,Z
         ("XYZ", 45),  # Group offer: any 3 of S,T,X,Y,Z
-        ("STXYZ", 85),  # Group offer (STX) + Y + Z
-        ("STXY", 65),  # Group offer (STX) + Y
+        ("STXYZ", 82),  # Group offer (STZ) + X + Y
+        ("STXY", 62),  # Group offer (STY) + X
         ("SSSSS", 85),  # 1 Group offer (3S) + 2S
         ("STXSTX", 90),  # 2 Group offers
-        ("STXSTXY", 110),  # 2 Group offers + Y
-        ("SSSTTTYYYZZZ", 195),  # 4 Group offers (from 12 items)
+        ("STXSTXY", 107),  # 2 Group offers + Y
+        ("SSSTTTYYYZZZ", 180),  # 4 Group offers (from 12 items)
         # Prioritisation of higher priced items in group discount
         ("ZZZ", 45),  # Group offer with 3Z (normally 63)
-        ("ZZTXX", 65),  # Group offer with Z,Z,X (higher prices) + T + X
-        ("SSTX", 60),  # Group offer with S,T,X + S
+        ("ZZTXX", 79),  # Group offer with Z,Z,X + T + X
+        ("SSTX", 62),  # Group offer with S,T,X + S
         # Complex combinations across multiple offer types
         ("ABCDE", 155),  # A(50) + B(30) + C(20) + D(15) + E(40)
         (
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            954,
+            837,
         ),  # One of each item with all applicable offers
-        ("AAAAAEEBAAABB", 445),  # 10A for 400 + 2E for 80 + 3B where 1 is free = 445
+        ("AAAAAEEBAAABB", 455),  # 10A for 400 + 2E for 80 + 3B where 1 is free = 455
         (
             "ABCDECBAABCABBAEEE",
             510,
         ),  # 5A(200) + 5B(105) + 3C(60) + 2D(30) + 3E(120) - 1B free
         ("RRRNNNFFUUU", 410),  # 3R(150) + 3N(120) + 2F(20) + 3U(120) = 410
-        ("EEBRRRQQ", 280),  # 2E + B(free) + 3R + Q(free) + Q
+        ("EEBRRRQQ", 260),  # 2E + B(free) + 3R + Q(free) + Q
     ],
 )
 def test_checkout_with_params(skus, expected):
@@ -158,4 +155,5 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
