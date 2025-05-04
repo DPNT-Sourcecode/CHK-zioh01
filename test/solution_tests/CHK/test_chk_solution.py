@@ -47,6 +47,17 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
     ],
 )
 def test_checkout_with_params(skus, expected):
+    """
+    Test the checkout functionality with various combinations of items and offers.
+
+    This test covers:
+    - Invalid input handling
+    - Basic item pricing
+    - Multi-item price offers (e.g., 3A for 130)
+    - 'Buy X get Y free' offers (e.g., buy 2E get 1B free)
+    - Combined offers
+    """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
