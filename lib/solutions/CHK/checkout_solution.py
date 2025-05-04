@@ -122,6 +122,8 @@ class CheckoutSolution:
         can be claimed for free based on the number of E items in the basket.
 
         For offers like "Buy 2F get 1F free", this effectively means every third F is free.
+        This also handles cases where the free item isn't in the basket (no effect)
+        and where multiple free item offers apply to the same basket.
 
         Args:
             counts: Counter of items in the basket
@@ -183,6 +185,11 @@ class CheckoutSolution:
         2. Applying "buy X get Y free" offers
         3. Applying multi-item price offers
 
+        The checkout process prioritises customer value by applying offers in the
+        optimal order: free item offers first (to avoid paying for items that should
+        be free), then multi-item pricing offers (larger quantity offers before
+        smaller ones).
+
         Args:
             skus: A string containing the SKUs of all products in the basket
                  Each character represents one item (e.g., "AABCD" = 2 A's, 1 B, 1 C, 1 D)
@@ -240,5 +247,6 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
 
