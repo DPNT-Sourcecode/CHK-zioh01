@@ -126,6 +126,15 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ),  # 5A(200) + 5B(105) + 3C(60) + 2D(30) + 3E(120) - 1B free
         ("RRRNNNFFUUU", 410),  # 3R(150) + 3N(120) + 2F(20) + 3U(120) = 410
         ("EEBRRRQQ", 260),  # 2E + B(free) + 3R + Q(free) + Q
+        # Comprehensive edge case that tests all three offer types together
+        (
+            "AAAEEEFFRSTXYZ",
+            402,
+        ),  # 3A(130) + 2E(80) + 3F(20) + R(50) + S,T,X,Y,Z(122)
+        # B from 2E is not present so not applied
+        # R doesn't qualify for free Q (need 3R)
+        # Group discount selects highest value items (Z,S,T) for 45
+        # X(17) and Y(20) charged at normal price
     ],
 )
 def test_checkout_with_params(skus, expected):
@@ -155,5 +164,6 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
 

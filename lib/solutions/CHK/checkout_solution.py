@@ -308,8 +308,7 @@ class CheckoutSolution:
         1. Validating the input
         2. Applying "buy X get Y free" offers
         3. Applying group discount offers
-        4. Applying multi-item price offers to remaining items (Conditional: only for items still
-           in the basket after previous offers have been applied)
+        4. Calculating prices for remaining items, including multi-item price offers
 
         The checkout process prioritises customer value by applying offers in the
         optimal order: free item offers first (to avoid paying for items that should
@@ -361,6 +360,7 @@ class CheckoutSolution:
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
+
 
 
 
