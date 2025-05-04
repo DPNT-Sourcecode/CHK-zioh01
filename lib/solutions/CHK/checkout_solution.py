@@ -143,6 +143,25 @@ class CheckoutSolution:
             ),  # Any 3 of S,T,X,Y,Z for 45
         ]
 
+    def _is_self_referential_offer(
+        self, item: str, free_count: int, counts: CounterType
+    ) -> bool:
+        """Check if an item has a self-referential free offer (buy X get X free).
+
+        Args:
+            item: The item to check
+            free_count: Number of free items that could be claimed
+            counts: Counter of all items in the basket
+
+        Returns:
+            True if the item has a self-referential offer, False otherwise
+        """
+        return any(
+            offer.free_item == item and offer.buy_quantity * free_count <= counts[item]
+            for offer_item, offer in self.free_item_offers.items()
+            if offer_item == item
+        )
+
     def _apply_free_item_offers(self, counts: CounterType) -> CounterType:
         """Apply 'buy X get Y free' offers and return adjusted counts.
 
@@ -187,7 +206,7 @@ class CheckoutSolution:
                         if offer_item == item and offer.free_item == item
                     ]
                     if item_offers:
-                        offer_item, offer = item_offers[0]
+                        _, offer = item_offers[0]
                         # Calculate how many items are effectively free
                         # e.g., for 2F get 1F free, with 6F, 2 are free (every third item)
                         buy_quantity = offer.buy_quantity
@@ -199,25 +218,6 @@ class CheckoutSolution:
                     adjusted_counts[item] = counts[item] - free_count
 
         return adjusted_counts
-
-    def _is_self_referential_offer(
-        self, item: str, free_count: int, counts: CounterType
-    ) -> bool:
-        """Check if an item has a self-referential free offer (buy X get X free).
-
-        Args:
-            item: The item to check
-            free_count: Number of free items that could be claimed
-            counts: Counter of all items in the basket
-
-        Returns:
-            True if the item has a self-referential offer, False otherwise
-        """
-        return any(
-            offer.free_item == item and offer.buy_quantity * free_count <= counts[item]
-            for offer_item, offer in self.free_item_offers.items()
-            if offer_item == item
-        )
 
     def _apply_group_discounts(self, counts: CounterType) -> tuple[CounterType, int]:
         """Apply group discount offers and return adjusted counts and additional cost.
@@ -360,3 +360,4 @@ class CheckoutSolution:
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
+
