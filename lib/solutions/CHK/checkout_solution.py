@@ -20,7 +20,7 @@ class CheckoutSolution:
         self.prices = {"A": 50, "B": 30, "C": 20, "D": 15, "E": 40}
         # Set the special offers for SKUs
         self.offers = {
-            "A": [Offer(quantity=3, price=130), Offer(quantity=5, price=200)],
+            "A": [Offer(quantity=5, price=200), Offer(quantity=3, price=130)],
             "B": [Offer(quantity=2, price=45)],
         }
         # Set the offers with free items
@@ -38,16 +38,29 @@ class CheckoutSolution:
 
         # get counts for SKUs
         counts = Counter(skus)
+
+        # Apply free item offers first
+        for item, offer in self.free_item_offers.items():
+            if item in counts and offer.free_item in counts:
+                free_count = counts[item] // offer.buy_quantity
+                counts[offer.free_item] = max(0, counts[offer.free_item] - free_count)
+
         total = 0
 
         # determine the total checkout value (with offers applied)
         for item, count in counts.items():
-            # handle items with applicable offers
             if item in self.offers:
-                offer = self.offers[item]
-                total += (count // offer.quantity) * offer.price
-                total += (count % offer.quantity) * self.prices[item]
+                # Apply offers in order (best deals first)
+                remaining = count
+                for offer in self.offers[item]:
+                    if remaining >= offer.quantity:
+                        total += (remaining // offer.quantity) * offer.price
+                        remaining %= offer.quantity
+
+                # Add remaining items at regular price
+                total += remaining * self.prices[item]
             else:
                 total += count * self.prices[item]
 
         return total
+
