@@ -9,8 +9,8 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         # Invalid inputs
         (None, -1),
         ("a", -1),
-        ("X", -1),
-        ("ABCa", -1),
+        ("#", -1),  # Using # as an invalid SKU instead of X
+        ("ABC#", -1),
         # Empty basket
         ("", 0),
         # Single SKUs (basic pricing)
@@ -54,7 +54,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("HHHHH", 45),  # 5H for 45
         ("HHHHHHHHHH", 80),  # 10H for 80
         ("HHHHHHHHHHH", 90),  # 10H for 80 + 1H for 10
-        ("HHHHHHHHHHHHHHHH", 160),  # 10H for 80 + 5H for 45 + 1H for 10
+        ("HHHHHHHHHHHHHHHH", 135),  # 10H for 80 + 6H for 55 (corrected)
         # Multi-price offers for K
         ("KK", 150),  # 2K for 150
         ("KKK", 230),  # 2K for 150 + 1K for 80
@@ -68,7 +68,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("VV", 90),  # 2V for 90
         ("VVV", 130),  # 3V for 130
         ("VVVV", 180),  # 3V for 130 + 1V for 50
-        ("VVVVV", 230),  # 3V for 130 + 2V for 90
+        ("VVVVV", 220),  # 2V for 90 + 3V for 130 (corrected)
         ("VVVVVV", 260),  # 2 sets of 3V for 260
         # Free B with E offer
         ("EEB", 80),  # 2E for 80 + 1B free (not charged)
@@ -105,8 +105,8 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ),  # 5A(200) + 5B(105) + 3C(60) + 2D(30) + 3E(120) - 15 = 510
         (
             "RRRNNNFFUUU",
-            360,
-        ),  # 3R(150) + 3N(120) + 3F(20) + 3U(120) - 1Q(30) - 1M(15) - 1F(0) - 1U(0) = 360
+            410,
+        ),  # 3R(150) + 3N(120) + 2F(20) + 3U(120) = 410 (corrected)
     ],
 )
 def test_checkout_with_params(skus, expected):
@@ -123,4 +123,5 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
