@@ -75,6 +75,7 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("EEBB", 110),  # 2E for 80 + 1B free + 1B charged (30)
         ("EEEEBB", 160),  # 4E for 160 + 2B free (not charged)
         ("EEEB", 120),  # 3E(120) and B is free
+        ("EE", 80),  # 2E for 80, qualify for free B but no B in basket
         # Interaction between E and B offers
         ("EEBBB", 125),  # 2E(80) + 3B where 1 is free, so 2B with offer = 45
         # 2F get one F free offer
@@ -87,9 +88,11 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("NNNM", 120),  # 3N(120) + M free
         ("NNNNM", 160),  # 3N(120) + 1N(40) + M free
         ("NNNMM", 135),  # 3N(120) + 1M(15) + 1M free
+        ("NNN", 120),  # 3N(120), qualify for free M but no M in basket
         # Buy 3R get one Q free
         ("RRRQ", 150),  # 3R(150) + Q free
         ("RRRQQQ", 210),  # 3R(150) + 2Q(60) + 1Q free
+        ("RRR", 150),  # 3R(150), qualify for free Q but no Q in basket
         # Buy 3U get one U free
         ("UUU", 120),  # 3U(120), no free item yet
         ("UUUU", 120),  # 3U(120) + 1U free
@@ -121,6 +124,7 @@ def test_checkout_with_params(skus, expected):
     - 'Buy X get Y free' offers:
       * Different items (buy 2E get 1B free, buy 3N get 1M free, buy 3R get 1Q free)
       * Interaction with multi-price offers (E and B combination)
+      * Edge case: qualifying for free item that's not in basket
     - 'Buy X get X free' offers:
       * Self-referential offers (buy 2F get 1F free, buy 3U get 1U free)
       * Different quantities and patterns
@@ -128,6 +132,7 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
 
 
