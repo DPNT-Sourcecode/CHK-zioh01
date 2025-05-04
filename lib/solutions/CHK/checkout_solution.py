@@ -247,6 +247,3 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
-
-
-

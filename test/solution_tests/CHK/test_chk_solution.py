@@ -132,7 +132,3 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
-
-
-
-
