@@ -211,7 +211,10 @@ class CheckoutSolution:
                         # e.g., for 2F get 1F free, with 6F, 2 are free (every third item)
                         buy_quantity = offer.buy_quantity
                         total_count = counts[item]
-                        free_count = total_count // (buy_quantity + 1)
+                        items_per_offer_cycle = (
+                            buy_quantity + 1
+                        )  # Items to buy + free item
+                        free_count = total_count // items_per_offer_cycle
                         adjusted_counts[item] = total_count - free_count
                 else:
                     # For other items, simply reduce the count
@@ -360,4 +363,5 @@ class CheckoutSolution:
             total += self._apply_multi_price_offers(item, adjusted_counts[item])
 
         return total
+
 
