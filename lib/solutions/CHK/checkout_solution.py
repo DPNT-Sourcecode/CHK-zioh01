@@ -223,50 +223,29 @@ class CheckoutSolution:
 
         # Process each group discount offer
         for discount in self.group_discounts:
-            # Get all eligible items and their counts
-            eligible_items = []
+            # Calculate how many items in the discount group are in the basket
+            all_eligible_items = []
             for item in discount.items:
                 if item in adjusted_counts and adjusted_counts[item] > 0:
-                    eligible_items.append(
-                        (item, self.prices[item], adjusted_counts[item])
+                    # Collect all instances of eligible items with their price
+                    all_eligible_items.extend(
+                        [(item, self.prices[item])] * adjusted_counts[item]
                     )
 
-            # Sort by price descending to maximise customer value
-            # Higher priced items are included in the offer first
-            eligible_items.sort(key=lambda x: x[1], reverse=True)
+            # Sort by price in descending order to prioritize higher priced items
+            all_eligible_items.sort(key=lambda x: x[1], reverse=True)
 
             # Apply the discount as many times as possible
-            while True:
-                items_for_offer = []
-                total_count = 0
+            while len(all_eligible_items) >= discount.quantity:
+                # Take the next 'quantity' items for this discount
+                items_for_discount = all_eligible_items[: discount.quantity]
+                all_eligible_items = all_eligible_items[discount.quantity :]
 
-                # Try to collect enough items for one offer
-                for item, _, count in eligible_items:
-                    # Skip if this item is depleted
-                    if adjusted_counts[item] <= 0:
-                        continue
+                # Remove these items from the adjusted counts
+                for item, _ in items_for_discount:
+                    adjusted_counts[item] -= 1
 
-                    # Take as many as needed/available
-                    items_needed = min(
-                        adjusted_counts[item], discount.quantity - total_count
-                    )
-                    if items_needed > 0:
-                        items_for_offer.append((item, items_needed))
-                        total_count += items_needed
-
-                    # If we have enough items, stop looking
-                    if total_count >= discount.quantity:
-                        break
-
-                # If we couldn't collect enough items, we're done
-                if total_count < discount.quantity:
-                    break
-
-                # Apply the discount
-                for item, count in items_for_offer:
-                    adjusted_counts[item] -= count
-
-                # Add the cost of this group discount
+                # Add the discounted price
                 total_group_cost += discount.price
 
         return adjusted_counts, total_group_cost
@@ -319,17 +298,11 @@ class CheckoutSolution:
 
         # Step 3: Calculate price for each item type
         for item in self.prices:
-            # Skip items not in the basket
-            if item not in counts:
+            # Skip items not in the basket or fully consumed by group discounts
+            if item not in adjusted_counts or adjusted_counts[item] <= 0:
                 continue
 
-            # For items that might be free or part of group discounts,
-            # use the adjusted count after applying those offers
             count = adjusted_counts[item]
-
-            # Skip if count is 0 after adjustments
-            if count == 0:
-                continue
 
             # Apply multi-price offers if available for this item
             if item in self.multi_price_offers:
@@ -349,4 +322,5 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
