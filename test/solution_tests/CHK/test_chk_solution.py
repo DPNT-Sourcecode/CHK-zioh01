@@ -11,6 +11,8 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("a", -1),
         ("X", -1),
         ("ABCa", -1),
+        # Empty basket
+        ("", 0),
         # Single SKUs
         ("A", 50),
         ("B", 30),
@@ -39,6 +41,9 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("EEB", 80),  # 2E for 80 + 1B free (not charged)
         ("EEBB", 110),  # 2E for 80 + 1B free + 1B charged (30)
         ("EEEEBB", 160),  # 4E for 160 + 2B free (not charged)
+        ("EEEB", 120),  # 3E(120) and B is free
+        # Interaction between E and B offers
+        ("EEBBB", 125),  # 2E(80) + 3B where 1 is free, so 2B with offer = 45
         # 2F get one F free offer
         ("FF", 20),  # 2F for 20
         ("FFF", 20),  # 3F, but one is free, so paying for 2F = 20
@@ -73,6 +78,7 @@ def test_checkout_with_params(skus, expected):
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
 
 
