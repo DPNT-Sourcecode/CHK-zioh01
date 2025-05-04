@@ -24,6 +24,7 @@ class CheckoutSolution:
 
     1. Multi-item price offers (e.g., 3A for 130, 5A for 200)
     2. 'Buy X get Y free' offers (e.g., buy 2E get 1B free)
+    3. 'Buy X get one X free' offers (e.g., buy 2F get one F free)
 
     The system always favors the customer when applying offers, applying offers with
     better value first and ensuring the customer gets the maximum possible discount.
@@ -43,11 +44,14 @@ class CheckoutSolution:
         >>> solution.checkout("EEB")
         # 2E = 80, B is free from the offer, total = 80
         80
+        >>> solution.checkout("FFF")
+        # 3F where one is free from the offer, total = 20
+        20
     """
 
     def __init__(self):
         # Base prices for each item
-        self.prices = {"A": 50, "B": 30, "C": 20, "D": 15, "E": 40}
+        self.prices = {"A": 50, "B": 30, "C": 20, "D": 15, "E": 40, "F": 10}
 
         # Multi-price offers for bulk purchases
         # Ordered by size for better customer value (larger offers first)
@@ -61,7 +65,8 @@ class CheckoutSolution:
 
         # Buy X get Y free offers
         self.free_item_offers = {
-            "E": BuyXGetYFree(buy_quantity=2, free_item="B")  # Buy 2E get 1B free
+            "E": BuyXGetYFree(buy_quantity=2, free_item="B"),  # Buy 2E get 1B free
+            "F": BuyXGetYFree(buy_quantity=2, free_item="F"),  # Buy 2F get 1F free
         }
 
     def _apply_free_item_offers(self, counts: Counter) -> Counter:
@@ -69,6 +74,8 @@ class CheckoutSolution:
 
         For offers like "Buy 2E get 1B free", this calculates how many B items
         can be claimed for free based on the number of E items in the basket.
+
+        For offers like "Buy 2F get 1F free", this effectively means every third F is free.
 
         Args:
             counts: Counter of items in the basket
@@ -85,7 +92,17 @@ class CheckoutSolution:
                 # and therefore how many free items can be claimed
                 free_items = counts[item] // offer.buy_quantity
 
-                if free_items > 0 and offer.free_item in counts:
+                # Handle the case where item gives itself for free (e.g., F)
+                if offer.free_item == item:
+                    # For every N items of X that you buy, you get 1 more free
+                    # So if you have a total of M items, you only need to pay for M - (M // (N+1))
+                    # For example, for every 2F you get 1F free, meaning for every 3F you only pay for 2F
+                    effective_count = counts[item] - min(
+                        free_items, counts[item] // (offer.buy_quantity + 1)
+                    )
+                    adjusted_counts[item] = effective_count
+                # Handle the case where item gives another item for free (e.g., E gives B)
+                elif free_items > 0 and offer.free_item in counts:
                     # Reduce the count of the free item, but not below 0
                     # This ensures we don't give more free items than exist in the basket
                     adjusted_counts[offer.free_item] = max(
@@ -134,12 +151,8 @@ class CheckoutSolution:
             if item not in counts:
                 continue
 
-            # Start with the original count
-            count = counts[item]
-
             # For items that might be free, use the adjusted count after applying free item offers
-            if item in [offer.free_item for _, offer in self.free_item_offers.items()]:
-                count = adjusted_counts[item]
+            count = adjusted_counts[item]
 
             # Apply multi-price offers if available for this item
             if item in self.multi_price_offers:
@@ -159,5 +172,6 @@ class CheckoutSolution:
                 total += count * self.prices[item]
 
         return total
+
 
 

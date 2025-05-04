@@ -17,12 +17,14 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("C", 20),
         ("D", 15),
         ("E", 40),
+        ("F", 10),
         # Multiples of same SKU
         ("AA", 100),
         ("BB", 45),
         ("CC", 40),
         ("DD", 30),
         ("EE", 80),
+        ("FF", 20),
         # Special offers for A
         ("AAA", 130),
         ("AAAA", 180),
@@ -37,13 +39,24 @@ from lib.solutions.CHK.checkout_solution import CheckoutSolution
         ("EEB", 80),  # 2E for 80 + 1B free (not charged)
         ("EEBB", 110),  # 2E for 80 + 1B free + 1B charged (30)
         ("EEEEBB", 160),  # 4E for 160 + 2B free (not charged)
+        # 2F get one F free offer
+        ("FF", 20),  # 2F for 20
+        ("FFF", 20),  # 3F, but one is free, so paying for 2F = 20
+        ("FFFF", 30),  # 4F = 2F for 20 + 2F for 10 (one free)
+        ("FFFFF", 40),  # 5F = 2F for 20 + 2F for 20, the 5th costs 0
+        ("FFFFFF", 40),  # 6F = 2 sets of 3F, where each set is 2F paid + 1F free
         # Complex combinations
         ("ABCDE", 155),  # A(50) + B(30) + C(20) + D(15) + E(40)
+        ("ABCDEF", 165),  # A(50) + B(30) + C(20) + D(15) + E(40) + F(10)
         ("AAAAAEEBAAABB", 455),  # 10A for 400 + 2E for 80 + 3B where 1 is free = 455
         (
             "ABCDECBAABCABBAEEE",
             510,
         ),  # 5A(200) + 5B(105 after discount) + 3C(60) + 2D(30) + 3E(120) - 15 = 510
+        (
+            "ABCDECBAABCABBAEEEFFFFFFFF",
+            570,
+        ),  # Previous case (510) + 6F where 2 are free (60) = 570
     ],
 )
 def test_checkout_with_params(skus, expected):
@@ -55,9 +68,11 @@ def test_checkout_with_params(skus, expected):
     - Basic item pricing
     - Multi-item price offers (e.g., 3A for 130)
     - 'Buy X get Y free' offers (e.g., buy 2E get 1B free)
+    - 'Buy X get X free' offers (e.g., buy 2F get 1F free)
     - Combined offers
     """
     checkout = CheckoutSolution()
     assert checkout.checkout(skus) == expected
+
 
 
